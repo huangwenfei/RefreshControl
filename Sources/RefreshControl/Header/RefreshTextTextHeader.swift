@@ -15,13 +15,22 @@ open class RefreshTextTextHeader: RefreshHeader {
     open var timeProvider: RefreshTextTimeProvider = .init()
     open var titleProvider: RefreshTextTextProvider = .init()
     
-    // MARK: Properties - State
+    // MARK: Properties
     open override var state: RefreshState {
         didSet {
             stateProvider.render(state: state, refresh: self)
             timeProvider.render(state: state, refresh: self)
             titleProvider.render(state: state, refresh: self)
             setNeedsUpdate()
+        }
+    }
+    
+    open override var direction: RefreshHeader.Direction {
+        didSet {
+            stateProvider.convertSources(isLineFeed: direction.isHorizontal)
+            timeProvider.convertSources(isLineFeed: direction.isHorizontal)
+            titleProvider.convertSources(isLineFeed: direction.isHorizontal)
+            self.state = state
         }
     }
     

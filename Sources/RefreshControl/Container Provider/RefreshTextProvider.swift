@@ -65,6 +65,22 @@ open class RefreshTextProvider:
         return valueLabel
     }
     
+    open func convertSources(isLineFeed: Bool) {
+        isLineFeed ? convertToLineFeedSources() : convertToUnLineFeedSources()
+    }
+    
+    open func convertToLineFeedSources() {
+        values = .init(uniqueKeysWithValues: values.map({
+            ($0.key, $0.value.lineFeed())
+        }))
+    }
+    
+    open func convertToUnLineFeedSources() {
+        values = .init(uniqueKeysWithValues: values.map({
+            ($0.key, $0.value.unlineFeed())
+        }))
+    }
+    
     open func size(directionSize: Refresh.DirectionSize) -> CGSize {
         let result: CGSize
         if let size = directionSize.state {
@@ -105,9 +121,10 @@ open class RefreshTextProvider:
         let text = isInsetLineFeedToText ? dealingLineFeedText(text) : text
         if var info = values[state] {
             info.text = text
+            info.isLineFeedText = isInsetLineFeedToText
             values[state] = info
         } else {
-            values[state] = .init(text: text)
+            values[state] = .init(text: text, isLineFeedText: isInsetLineFeedToText)
         }
     }
     
@@ -148,17 +165,48 @@ open class RefreshTextProvider:
 extension RefreshTextProvider {
     public struct LabelInfo: Hashable {
         public var text: String
+        public var isLineFeedText: Bool
         public var font: UIFont
         public var color: UIColor
         
         public init(
             text: String = "",
+            isLineFeedText: Bool = false,
             font: UIFont = .systemFont(ofSize: 14),
             color: UIColor = .gray
         ) {
             self.text = text
+            self.isLineFeedText = isLineFeedText
             self.font = font
             self.color = color
+        }
+        
+        public func lineFeed() -> Self {
+            guard isLineFeedText == false else { return self }
+            var linefeed = self
+            linefeed.text = RefreshTextProvider.dealingLineFeedText(linefeed.text)
+            linefeed.isLineFeedText = true
+            return linefeed
+        }
+        
+        public mutating func lineFeeded() {
+            guard isLineFeedText == false else { return }
+            self.text = RefreshTextProvider.dealingLineFeedText(text)
+            self.isLineFeedText = true
+        }
+        
+        public func unlineFeed() -> Self {
+            guard isLineFeedText else { return self }
+            var linefeed = self
+            linefeed.text = RefreshTextProvider.dealingUnLineFeedText(linefeed.text)
+            linefeed.isLineFeedText = false
+            return linefeed
+        }
+        
+        public mutating func unlineFeeded() {
+            guard isLineFeedText else { return }
+            self.text = RefreshTextProvider.dealingUnLineFeedText(text)
+            self.isLineFeedText = false
         }
     }
 }

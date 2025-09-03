@@ -117,13 +117,28 @@ public protocol RefreshViewPrepare {
 
 public protocol RefreshLineFeedProtocol { }
 extension RefreshLineFeedProtocol {
-    public func dealingLineFeedText(_ text: String) -> String {
+    public static func dealingLineFeedText(_ text: String) -> String {
         var result: String = ""
-        for char in text {
+        for (index, char) in text.enumerated() {
+            guard index != text.count - 1 else {
+                result += String(char)
+                break
+            }
             result += (String(char) + "\n")
         }
-        result.removeLast("\n".count)
         return result
+    }
+    
+    public func dealingLineFeedText(_ text: String) -> String {
+        Self.dealingLineFeedText(text)
+    }
+    
+    public static func dealingUnLineFeedText(_ text: String) -> String {
+        text.replacingOccurrences(of: "\n", with: "")
+    }
+    
+    public func dealingUnLineFeedText(_ text: String) -> String {
+        Self.dealingUnLineFeedText(text)
     }
 }
 

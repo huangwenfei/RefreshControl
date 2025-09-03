@@ -11,12 +11,12 @@
 //  `footer-bottom`:
 //     top
 //          `content`
-//       `time content`
 //       `state content`
+//       `time content`
 //
 //     leading
-//       [`content`     `time content`
-//        `content`]    `state content`
+//       [`content`     `state content`
+//        `content`]    `time content`
 //
 //     bottom
 //       `time content`
@@ -24,8 +24,8 @@
 //          `content`
 //
 //     trailing
-//       `time content`   [`content`
-//       `state content`     `content`]
+//       `state content`   [`content`
+//       `time content`     `content`]
 //
 //
 //  `footer-trailing`:
@@ -41,7 +41,7 @@
 //                    `content`
 //
 //     trailing
-//       `state content`     `time content`     `content`
+//       `time content`    `state content`     `content`
 //
 //
 //  Created by windy on 2025/7/16.
@@ -106,8 +106,8 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
         let offset = scrollView.contentOffset
         let bouncesOffset = scrollBreakPointOffset(scrollView: scrollView)
         
-        let stateSize = isShowState ? self.stateSize : .zero
-        let timeSize = isShowTime ? self.timeSize : .zero
+        let stateSize = self.stateSize
+        let timeSize = self.timeSize
         
         switch direction {
         case .bottom:
@@ -147,11 +147,12 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
     
     open override func updateConstraints() {
         
-        let contentSize = directionSize.content
+        let contentSize = isShowContent ? directionSize.content : 0
         let stateSize = isShowState ? self.stateSize : .zero
         let timeSize = isShowTime ? self.timeSize : .zero
         
         switch direction {
+            // MARK: Bottom
         case .bottom:
             
             let backgroundSize = directionSize.backgroundSize(
@@ -179,16 +180,15 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.vertical.equalToParent()
                     make.leading.equalToParent()
-                    make.trailing.equal(to: stateContainer.yangbatch.leading)
-                    make.width.equal(to: contentSize)
+                    make.trailing.equalToParent(isShowContent ? .centerX : .leading)
                 }
                 
-                timeContainer.yangbatch.remake { make in
+                stateContainer.yangbatch.remake { make in
                     make.leading.equal(to: contentContainer.yangbatch.trailing)
                     make.trailing.equalToParent()
                     make.top.equalToParent()
                     let multiplier: CGFloat
-                    switch (isShowTime, isShowState) {
+                    switch (isShowState, isShowTime) {
                     case (true, true):  multiplier = 0.5
                     case (true, false): multiplier = 1
                     case (false, _):    multiplier = 0.001
@@ -196,12 +196,12 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                     make.height.equalToParent().multiplier(by: multiplier)
                 }
                 
-                stateContainer.yangbatch.remake { make in
+                timeContainer.yangbatch.remake { make in
                     make.leading.equal(to: contentContainer.yangbatch.trailing)
                     make.trailing.equalToParent()
                     make.bottom.equalToParent()
                     let multiplier: CGFloat
-                    switch (isShowState, isShowTime) {
+                    switch (isShowTime, isShowState) {
                     case (true, true):  multiplier = 0.5
                     case (true, false): multiplier = 1
                     case (false, _):    multiplier = 0.001
@@ -219,17 +219,16 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 
                 contentContainer.yangbatch.remake { make in
                     make.vertical.equalToParent()
-                    make.leading.equal(to: stateContainer.yangbatch.trailing)
                     make.trailing.equalToParent()
-                    make.width.equal(to: contentSize)
+                    make.leading.equalToParent(isShowContent ? .centerX : .trailing)
                 }
                 
-                timeContainer.yangbatch.remake { make in
-                    make.leading.equal(to: contentContainer.yangbatch.trailing)
-                    make.trailing.equalToParent()
+                stateContainer.yangbatch.remake { make in
+                    make.trailing.equal(to: contentContainer.yangbatch.leading)
+                    make.leading.equalToParent()
                     make.top.equalToParent()
                     let multiplier: CGFloat
-                    switch (isShowTime, isShowState) {
+                    switch (isShowState, isShowTime) {
                     case (true, true):  multiplier = 0.5
                     case (true, false): multiplier = 1
                     case (false, _):    multiplier = 0.001
@@ -237,12 +236,12 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                     make.height.equalToParent().multiplier(by: multiplier)
                 }
                 
-                stateContainer.yangbatch.remake { make in
-                    make.leading.equal(to: contentContainer.yangbatch.trailing)
-                    make.trailing.equalToParent()
+                timeContainer.yangbatch.remake { make in
+                    make.trailing.equal(to: contentContainer.yangbatch.leading)
+                    make.leading.equalToParent()
                     make.bottom.equalToParent()
                     let multiplier: CGFloat
-                    switch (isShowState, isShowTime) {
+                    switch (isShowTime, isShowState) {
                     case (true, true):  multiplier = 0.5
                     case (true, false): multiplier = 1
                     case (false, _):    multiplier = 0.001
@@ -258,24 +257,12 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.top.equalToParent()
                     make.horizontal.equalToParent()
-                    make.bottom.equal(to: timeContainer.yangbatch.top)
                     make.height.equal(to: isShowContent ? contentSize : 0)
-                }
-                
-                timeContainer.yangbatch.remake { make in
-                    make.horizontal.equalToParent()
-                    make.top.equal(to: contentContainer.yangbatch.bottom)
-                    let multiplier: CGFloat
-                    switch (isShowTime, isShowState) {
-                    case (true, _):  multiplier = 1
-                    case (false, _): multiplier = 0.001
-                    }
-                    make.height.equal(to: timeSize.height).multiplier(by: multiplier)
                 }
                 
                 stateContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
-                    make.bottom.equalToParent()
+                    make.top.equal(to: contentContainer.yangbatch.bottom)
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
                     case (true, _):  multiplier = 1
@@ -284,16 +271,20 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                     make.height.equal(to: stateSize.height).multiplier(by: multiplier)
                 }
                 
+                timeContainer.yangbatch.remake { make in
+                    make.horizontal.equalToParent()
+                    make.top.equal(to: stateContainer.yangbatch.bottom)
+                    let multiplier: CGFloat
+                    switch (isShowTime, isShowState) {
+                    case (true, _):  multiplier = 1
+                    case (false, _): multiplier = 0.001
+                    }
+                    make.height.equal(to: timeSize.height).multiplier(by: multiplier)
+                }
+                
             case .bottom:
                 elementsContainer.yangbatch.remake { make in
                     make.diretionEdge.equalToParent()
-                }
-                
-                contentContainer.yangbatch.remake { make in
-                    make.horizontal.equalToParent()
-                    make.top.equal(to: stateContainer.yangbatch.bottom)
-                    make.bottom.equalToParent()
-                    make.height.equal(to: isShowContent ? contentSize : 0)
                 }
                 
                 timeContainer.yangbatch.remake { make in
@@ -309,7 +300,7 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 
                 stateContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
-                    make.bottom.equal(to: contentContainer.yangbatch.top)
+                    make.top.equal(to: timeContainer.yangbatch.bottom)
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
                     case (true, _):  multiplier = 1
@@ -317,8 +308,15 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                     }
                     make.height.equal(to: stateSize.height).multiplier(by: multiplier)
                 }
+                
+                contentContainer.yangbatch.remake { make in
+                    make.horizontal.equalToParent()
+                    make.top.equal(to: stateContainer.yangbatch.bottom)
+                    make.height.equal(to: isShowContent ? contentSize : 0)
+                }
             }
             
+            // MARK: Trailing
         case .trailing:
             
             let backgroundSize = directionSize.backgroundSize(
@@ -343,7 +341,6 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.vertical.equalToParent()
                     make.leading.equalToParent()
-                    make.trailing.equal(to: stateContainer.yangbatch.leading)
                     make.width.equal(to: isShowContent ? contentSize : 0)
                 }
                 
@@ -359,7 +356,7 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 }
                 
                 timeContainer.yangbatch.remake { make in
-                    make.trailing.equalToParent()
+                    make.leading.equal(to: stateContainer.yangbatch.trailing)
                     make.vertical.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowTime, isShowState) {
@@ -377,12 +374,11 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.vertical.equalToParent()
                     make.trailing.equalToParent()
-                    make.leading.equal(to: timeContainer.yangbatch.trailing)
                     make.width.equal(to: isShowContent ? contentSize : 0)
                 }
                 
                 stateContainer.yangbatch.remake { make in
-                    make.leading.equalToParent()
+                    make.trailing.equal(to: contentContainer.yangbatch.leading)
                     make.vertical.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
@@ -393,7 +389,7 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 }
                 
                 timeContainer.yangbatch.remake { make in
-                    make.trailing.equal(to: contentContainer.yangbatch.leading)
+                    make.trailing.equal(to: stateContainer.yangbatch.leading)
                     make.vertical.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowTime, isShowState) {
@@ -414,7 +410,6 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
                     make.top.equalToParent()
-                    make.bottom.equal(to: stateContainer.yangbatch.top)
                     make.height.equal(to: contentSize)
                 }
                 
@@ -455,14 +450,13 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
                     make.bottom.equalToParent()
-                    make.top.equal(to: stateContainer.yangbatch.bottom)
                     make.height.equal(to: contentSize)
                 }
                 
                 stateContainer.yangbatch.remake { make in
                     make.leading.equalToParent()
-                    make.top.equal(to: contentContainer.yangbatch.bottom)
-                    make.bottom.equalToParent()
+                    make.bottom.equal(to: contentContainer.yangbatch.top)
+                    make.top.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
                     case (true, true):  multiplier = 0.5
@@ -474,8 +468,8 @@ open class RefreshFooter: Refresh, RefreshFooterProtocol {
                 
                 timeContainer.yangbatch.remake { make in
                     make.trailing.equalToParent()
-                    make.top.equal(to: contentContainer.yangbatch.bottom)
-                    make.bottom.equalToParent()
+                    make.bottom.equal(to: contentContainer.yangbatch.top)
+                    make.top.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowTime, isShowState) {
                     case (true, true):  multiplier = 0.5

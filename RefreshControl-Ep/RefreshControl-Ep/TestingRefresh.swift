@@ -51,7 +51,7 @@ struct TestingRefreshHeader {
         let header = RefreshTextTextHeader()
         header.contentAlignment = contentAlignment
         header.direction = direction
-        header.directionSize = .init(content: 50)
+        header.directionSize = .init(content: 90)
         header.update(elementsOn: elementsOn)
         header.set(target: target, action: action)
         header.setState(text: "调整排序", for: [.idle, .pulling])
@@ -102,7 +102,7 @@ struct TestingRefreshHeader {
         let header = RefreshTextImagesHeader()
         header.contentAlignment = contentAlignment
         header.direction = direction
-        header.directionSize = .init(content: 80)
+        header.directionSize = .init(content: 90)
         header.update(elementsOn: elementsOn)
         header.set(target: target, action: action)
         header.setState(text: "调整排序", for: [.idle, .pulling])
@@ -138,7 +138,7 @@ extension TestingRefreshHeader {
         let header = RefreshTextLottieHeader()
         header.contentAlignment = contentAlignment
         header.direction = direction
-        header.directionSize = .init(content: 80)
+        header.directionSize = .init(content: 90)
         header.update(elementsOn: elementsOn)
         header.set(target: target, action: action)
         header.setState(text: "调整排序", for: .beforeRefresing)
@@ -146,7 +146,7 @@ extension TestingRefreshHeader {
         header.setState(textFont: .systemFont(ofSize: 14), for: .all)
         header.setState(textColor: .lightGray, for: .all)
         header.setTime(text: "\(Date())", for: .all)
-        header.set(animation: .init(source: "Rocket", size: .init(width: 80, height: 80)))
+        header.set(animation: .init(source: "Rocket", size: .init(width: 90, height: 90)))
         return header
     }
 }
@@ -168,7 +168,7 @@ struct TestingRefreshFooter {
         let footer = RefreshTextTextFooter()
         footer.contentAlignment = contentAlignment
         footer.direction = direction
-        footer.directionSize = .init(content: 50)
+        footer.directionSize = .init(content: 90)
         footer.update(elementsOn: elementsOn)
         footer.set(target: target, action: action)
         footer.setState(text: "调整排序", for: [.idle, .pulling])
@@ -219,7 +219,7 @@ struct TestingRefreshFooter {
         let footer = RefreshTextImagesFooter()
         footer.contentAlignment = contentAlignment
         footer.direction = direction
-        footer.directionSize = .init(content: 80)
+        footer.directionSize = .init(content: 90)
         footer.update(elementsOn: elementsOn)
         footer.set(target: target, action: action)
         footer.setState(text: "调整排序", for: [.idle, .pulling])
@@ -255,7 +255,7 @@ extension TestingRefreshFooter {
         let footer = RefreshTextLottieFooter()
         footer.contentAlignment = contentAlignment
         footer.direction = direction
-        footer.directionSize = .init(content: 80)
+        footer.directionSize = .init(content: 90)
         footer.update(elementsOn: elementsOn)
         footer.set(target: target, action: action)
         footer.setState(text: "调整排序", for: .beforeRefresing)
@@ -263,7 +263,7 @@ extension TestingRefreshFooter {
         footer.setState(textFont: .systemFont(ofSize: 14), for: .all)
         footer.setState(textColor: .lightGray, for: .all)
         footer.setTime(text: "\(Date())", for: .all)
-        footer.set(animation: .init(source: "Rocket", size: .init(width: 80, height: 80)))
+        footer.set(animation: .init(source: "Rocket", size: .init(width: 90, height: 90)))
         return footer
     }
 }

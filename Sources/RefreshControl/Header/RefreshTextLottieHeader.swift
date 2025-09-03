@@ -26,6 +26,14 @@ open class RefreshTextLottieHeader: RefreshHeader {
         }
     }
     
+    open override var direction: RefreshHeader.Direction {
+        didSet {
+            stateProvider.convertSources(isLineFeed: direction.isHorizontal)
+            timeProvider.convertSources(isLineFeed: direction.isHorizontal)
+            self.state = state
+        }
+    }
+    
     // MARK: Init
     open override func initSetups() {
         super.initSetups()

@@ -25,6 +25,14 @@ open class RefreshTextImagesFooter: RefreshFooter {
         }
     }
     
+    open override var direction: RefreshFooter.Direction {
+        didSet {
+            stateProvider.convertSources(isLineFeed: direction.isHorizontal)
+            timeProvider.convertSources(isLineFeed: direction.isHorizontal)
+            self.state = state
+        }
+    }
+    
     // MARK: Init
     open override func initSetups() {
         super.initSetups()

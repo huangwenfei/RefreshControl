@@ -63,21 +63,21 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
     }()
     
     lazy var tool: UISegmentedControl = {
-        let view = UISegmentedControl(items: ["T", "B", "L", "T"])
+        let view = UISegmentedControl(items: ["Top", "Bottom", "Leading", "Trailing"])
         view.setTitleTextAttributes(
             [
-                .font: UIFont.systemFont(ofSize: 16, weight: .regular),
+                .font: UIFont.systemFont(ofSize: 14, weight: .regular),
                 .foregroundColor: UIColor.white
             ],
         for: .normal)
         view.setTitleTextAttributes(
             [
-                .font: UIFont.systemFont(ofSize: 17, weight: .bold),
+                .font: UIFont.systemFont(ofSize: 14, weight: .bold),
                 .foregroundColor: UIColor.purple
             ],
         for: .selected)
         view.addTarget(self, action: #selector(toolAction(sender:)), for: .valueChanged)
-        view.backgroundColor = .purple.withAlphaComponent(0.5)
+        view.backgroundColor = .purple.withAlphaComponent(0.8)
         return view
     }()
     
@@ -114,11 +114,32 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
             make.vertical.equalToParent()
             make.width.equalToParent().multiplier(by: 0.33)
         }
-        view.backgroundColor = .purple.withAlphaComponent(0.5)
+        view.backgroundColor = .purple.withAlphaComponent(0.8)
+        return view
+    }()
+    
+    lazy var diretionSegment: UISegmentedControl = {
+        let view = UISegmentedControl(items: ["Horizontal", "Vertical"])
+        view.setTitleTextAttributes(
+            [
+                .font: UIFont.systemFont(ofSize: 16, weight: .regular),
+                .foregroundColor: UIColor.white
+            ],
+        for: .normal)
+        view.setTitleTextAttributes(
+            [
+                .font: UIFont.systemFont(ofSize: 17, weight: .bold),
+                .foregroundColor: UIColor.purple
+            ],
+        for: .selected)
+        view.addTarget(self, action: #selector(directionAction(sender:)), for: .valueChanged)
+        view.backgroundColor = .purple.withAlphaComponent(0.8)
         return view
     }()
     
     var contentAlignment: Refresh.ContentAlignment = .leading
+    
+    var itemsCount: Int = 5
     
     // MARK: Layout
     override func viewDidLoad() {
@@ -129,6 +150,7 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
         collection.yang.addToParent(view)
         tool.yang.addToParent(view)
         elementOn.yang.addToParent(view)
+        diretionSegment.yang.addToParent(view)
         dismiss.yang.addToParent(view)
         
         let toolHeight: CGFloat = 50
@@ -171,6 +193,19 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
             }
         }
         
+        diretionSegment.selectedSegmentIndex = 1 // vertical
+        
+        diretionSegment.yangbatch.make { make in
+            make.height.equal(to: toolHeight)
+            make.leading.equalToParent().offset(16)
+            make.trailing.equalToParent().offset(-16)
+            if isHeader {
+                make.bottom.equal(to: elementOn.yangbatch.top).offset(-8)
+            } else {
+                make.top.equal(to: elementOn.yangbatch.bottom).offset(8)
+            }
+        }
+        
     }
     
     // MARK: Change
@@ -186,7 +221,8 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        50
+        
+        itemsCount
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -218,6 +254,8 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
     @objc func refresh(sender: Refresh) {
         print(collection.rcHeader?.state ?? "None", collection.rcFooter?.state ?? "None")
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.itemsCount += 5
+            self.collection.reloadData()
             self.collection.rcHeader?.finishedRefreshing()
             self.collection.rcFooter?.finishedRefreshing()
             print(self.collection.rcHeader?.state ?? "None", self.collection.rcFooter?.state ?? "None")
@@ -247,6 +285,19 @@ class TestingController: UIViewController, UICollectionViewDataSource, UICollect
         print(#function, #line, element.isShowContent, element.isShowState, element.isShowTime)
         collection.rcHeader?.update(elementsOn: element)
         collection.rcFooter?.update(elementsOn: element)
+    }
+    
+    @objc func directionAction(sender: UISegmentedControl) {
+        let index = sender.selectedSegmentIndex
+        let direction: UICollectionView.ScrollDirection
+        switch index {
+        case 0:  direction = .horizontal
+        case 1:  direction = .vertical
+        default: direction = .vertical
+        }
+        update(diretion: direction)
+        collection.rcHeader?.direction = direction.header
+        collection.rcFooter?.direction = direction.footer
     }
     
     @objc func dismissAction(sender: UIButton) {

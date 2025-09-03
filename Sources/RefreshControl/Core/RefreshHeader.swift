@@ -19,8 +19,8 @@
 //        `content`]    `time content`
 //
 //     bottom
-//       `state content`
 //       `time content`
+//       `state content`
 //          `content`
 //
 //     trailing
@@ -34,7 +34,7 @@
 //       [`time content`    `state content`]
 //
 //     leading
-//       `content`   `time content`    `state content`
+//       `content`   `state content`   `time content`
 //
 //     bottom
 //       [`time content`     `state content`]
@@ -104,8 +104,8 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
         let offset = scrollView.contentOffset
         let bouncesOffset = scrollBreakPointOffset(scrollView: scrollView)
         
-        let stateSize = isShowState ? self.stateSize : .zero
-        let timeSize = isShowTime ? self.timeSize : .zero
+        let stateSize = self.stateSize
+        let timeSize = self.timeSize
         
         switch direction {
         case .top:
@@ -146,11 +146,12 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
     
     open override func updateConstraints() {
         
-        let contentSize = directionSize.content
+        let contentSize = isShowContent ? directionSize.content : 0
         let stateSize = isShowState ? self.stateSize : .zero
         let timeSize = isShowTime ? self.timeSize : .zero
         
         switch direction {
+            // MARK: Top
         case .top:
             
             let backgroundSize = directionSize.backgroundSize(
@@ -168,8 +169,11 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
             
             switch contentAlignment {
             case .leading:
+                let maxWidth = contentSize + max(stateSize.width, timeSize.width)
                 elementsContainer.yangbatch.remake { make in
-                    make.edge.equalToParent()
+                    make.width.equal(to: maxWidth)
+                    make.vertical.equalToParent()
+                    make.center.equalToParent()
                 }
                 
                 contentContainer.yangbatch.remake { make in
@@ -205,14 +209,17 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                 }
                 
             case .trailing:
+                let maxWidth = contentSize + max(stateSize.width, timeSize.width)
                 elementsContainer.yangbatch.remake { make in
-                    make.edge.equalToParent()
+                    make.width.equal(to: maxWidth)
+                    make.vertical.equalToParent()
+                    make.center.equalToParent()
                 }
                 
                 contentContainer.yangbatch.remake { make in
                     make.vertical.equalToParent()
                     make.trailing.equalToParent()
-                    make.leading.equalToParent(.centerX)
+                    make.leading.equalToParent(isShowContent ? .centerX : .trailing)
                 }
                 
                 stateContainer.yangbatch.remake { make in
@@ -246,24 +253,6 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     make.diretionEdge.equalToParent()
                 }
                 
-                contentContainer.yangbatch.remake { make in
-                    make.top.equalToParent()
-                    make.horizontal.equalToParent()
-                    make.bottom.equal(to: stateContainer.yangbatch.top)
-                    make.height.equal(to: isShowContent ? contentSize : 0)
-                }
-                
-                stateContainer.yangbatch.remake { make in
-                    make.top.equal(to: contentContainer.yangbatch.bottom)
-                    make.horizontal.equalToParent()
-                    let multiplier: CGFloat
-                    switch (isShowState, isShowTime) {
-                    case (true, _):  multiplier = 1
-                    case (false, _): multiplier = 0.001
-                    }
-                    make.height.equal(to: stateSize.height).multiplier(by: multiplier)
-                }
-                
                 timeContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
                     make.bottom.equalToParent()
@@ -273,6 +262,23 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     case (false, _): multiplier = 0.001
                     }
                     make.height.equal(to: timeSize.height).multiplier(by: multiplier)
+                }
+                
+                stateContainer.yangbatch.remake { make in
+                    make.bottom.equal(to: timeContainer.yangbatch.top)
+                    make.horizontal.equalToParent()
+                    let multiplier: CGFloat
+                    switch (isShowState, isShowTime) {
+                    case (true, _):  multiplier = 1
+                    case (false, _): multiplier = 0.001
+                    }
+                    make.height.equal(to: stateSize.height).multiplier(by: multiplier)
+                }
+                
+                contentContainer.yangbatch.remake { make in
+                    make.bottom.equal(to: stateContainer.yangbatch.top)
+                    make.horizontal.equalToParent()
+                    make.height.equal(to: isShowContent ? contentSize : 0)
                 }
                 
             case .bottom:
@@ -282,13 +288,12 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                 
                 contentContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
-                    make.top.equal(to: timeContainer.yangbatch.bottom)
                     make.bottom.equalToParent()
                     make.height.equal(to: isShowContent ? contentSize : 0)
                 }
                 
                 stateContainer.yangbatch.remake { make in
-                    make.top.equalToParent()
+                    make.bottom.equal(to: contentContainer.yangbatch.top)
                     make.horizontal.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
@@ -300,7 +305,7 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                 
                 timeContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
-                    make.bottom.equal(to: contentContainer.yangbatch.top)
+                    make.bottom.equal(to: stateContainer.yangbatch.top)
                     let multiplier: CGFloat
                     switch (isShowTime, isShowState) {
                     case (true, _):  multiplier = 1
@@ -310,6 +315,7 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                 }
             }
             
+            // MARK: Leading
         case .leading:
             
             let backgroundSize = directionSize.backgroundSize(
@@ -327,30 +333,21 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
             
             switch contentAlignment {
             case .leading:
+                let maxHeight = contentSize + max(stateSize.height, timeSize.height)
                 elementsContainer.yangbatch.remake { make in
-                    make.diretionEdge.equalToParent()
+                    make.height.equal(to: maxHeight)
+                    make.horizontal.equalToParent()
+                    make.center.equalToParent()
                 }
                 
                 contentContainer.yangbatch.remake { make in
                     make.vertical.equalToParent()
                     make.leading.equalToParent()
-                    make.trailing.equal(to: timeContainer.yangbatch.leading)
                     make.width.equal(to: isShowContent ? contentSize : 0)
                 }
                 
-                timeContainer.yangbatch.remake { make in
-                    make.leading.equal(to: contentContainer.yangbatch.trailing)
-                    make.vertical.equalToParent()
-                    let multiplier: CGFloat
-                    switch (isShowTime, isShowState) {
-                    case (true, _):  multiplier = 1
-                    case (false, _): multiplier = 0.001
-                    }
-                    make.width.equal(to: timeSize.width).multiplier(by: multiplier)
-                }
-                
                 stateContainer.yangbatch.remake { make in
-                    make.trailing.equalToParent()
+                    make.leading.equal(to: contentContainer.yangbatch.trailing)
                     make.vertical.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
@@ -360,20 +357,8 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     make.width.equal(to: stateSize.width).multiplier(by: multiplier)
                 }
                 
-            case .trailing:
-                elementsContainer.yangbatch.remake { make in
-                    make.diretionEdge.equalToParent()
-                }
-                
-                contentContainer.yangbatch.remake { make in
-                    make.vertical.equalToParent()
-                    make.trailing.equalToParent()
-                    make.leading.equal(to: stateContainer.yangbatch.trailing)
-                    make.width.equal(to: isShowContent ? contentSize : 0)
-                }
-                
                 timeContainer.yangbatch.remake { make in
-                    make.leading.equalToParent()
+                    make.leading.equal(to: stateContainer.yangbatch.trailing)
                     make.vertical.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowTime, isShowState) {
@@ -381,6 +366,20 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     case (false, _): multiplier = 0.001
                     }
                     make.width.equal(to: timeSize.width).multiplier(by: multiplier)
+                }
+                
+            case .trailing:
+                let maxHeight = contentSize + max(stateSize.height, timeSize.height)
+                elementsContainer.yangbatch.remake { make in
+                    make.height.equal(to: maxHeight)
+                    make.horizontal.equalToParent()
+                    make.center.equalToParent()
+                }
+                
+                contentContainer.yangbatch.remake { make in
+                    make.vertical.equalToParent()
+                    make.trailing.equalToParent()
+                    make.width.equal(to: isShowContent ? contentSize : 0)
                 }
                 
                 stateContainer.yangbatch.remake { make in
@@ -394,6 +393,17 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     make.width.equal(to: stateSize.width).multiplier(by: multiplier)
                 }
                 
+                timeContainer.yangbatch.remake { make in
+                    make.trailing.equal(to: stateContainer.yangbatch.leading)
+                    make.vertical.equalToParent()
+                    let multiplier: CGFloat
+                    switch (isShowTime, isShowState) {
+                    case (true, _):  multiplier = 1
+                    case (false, _): multiplier = 0.001
+                    }
+                    make.width.equal(to: timeSize.width).multiplier(by: multiplier)
+                }
+                
             case .top:
                 let maxHeight = contentSize + max(stateSize.height, timeSize.height)
                 elementsContainer.yangbatch.remake { make in
@@ -405,21 +415,7 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
                     make.top.equalToParent()
-                    make.bottom.equal(to: stateContainer.yangbatch.top)
-                    make.height.equal(to: contentSize)
-                }
-                
-                timeContainer.yangbatch.remake { make in
-                    make.leading.equalToParent()
-                    make.top.equal(to: contentContainer.yangbatch.bottom)
-                    make.bottom.equalToParent()
-                    let multiplier: CGFloat
-                    switch (isShowTime, isShowState) {
-                    case (true, true):  multiplier = 0.5
-                    case (true, false): multiplier = 1
-                    case (false, _):    multiplier = 0.001
-                    }
-                    make.width.equalToParent().multiplier(by: multiplier)
+                    make.height.equal(to: isShowContent ? contentSize : 0)
                 }
                 
                 stateContainer.yangbatch.remake { make in
@@ -428,6 +424,19 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     make.bottom.equalToParent()
                     let multiplier: CGFloat
                     switch (isShowState, isShowTime) {
+                    case (true, true):  multiplier = 0.5
+                    case (true, false): multiplier = 1
+                    case (false, _):    multiplier = 0.001
+                    }
+                    make.width.equalToParent().multiplier(by: multiplier)
+                }
+                
+                timeContainer.yangbatch.remake { make in
+                    make.leading.equalToParent()
+                    make.top.equal(to: contentContainer.yangbatch.bottom)
+                    make.bottom.equalToParent()
+                    let multiplier: CGFloat
+                    switch (isShowTime, isShowState) {
                     case (true, true):  multiplier = 0.5
                     case (true, false): multiplier = 1
                     case (false, _):    multiplier = 0.001
@@ -446,21 +455,7 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                 contentContainer.yangbatch.remake { make in
                     make.horizontal.equalToParent()
                     make.bottom.equalToParent()
-                    make.top.equal(to: stateContainer.yangbatch.bottom)
                     make.height.equal(to: contentSize)
-                }
-                
-                timeContainer.yangbatch.remake { make in
-                    make.leading.equalToParent()
-                    make.bottom.equal(to: contentContainer.yangbatch.top)
-                    make.top.equalToParent()
-                    let multiplier: CGFloat
-                    switch (isShowTime, isShowState) {
-                    case (true, true):  multiplier = 0.5
-                    case (true, false): multiplier = 1
-                    case (false, _):    multiplier = 0.001
-                    }
-                    make.width.equalToParent().multiplier(by: multiplier)
                 }
                 
                 stateContainer.yangbatch.remake { make in
@@ -475,6 +470,20 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
                     }
                     make.width.equalToParent().multiplier(by: multiplier)
                 }
+                
+                timeContainer.yangbatch.remake { make in
+                    make.leading.equalToParent()
+                    make.bottom.equal(to: contentContainer.yangbatch.top)
+                    make.top.equalToParent()
+                    let multiplier: CGFloat
+                    switch (isShowTime, isShowState) {
+                    case (true, true):  multiplier = 0.5
+                    case (true, false): multiplier = 1
+                    case (false, _):    multiplier = 0.001
+                    }
+                    make.width.equalToParent().multiplier(by: multiplier)
+                }
+        
             }
         }
         
