@@ -86,13 +86,24 @@ open class RefreshTextProvider:
         if let size = directionSize.state {
             result = .init(width: size, height: size)
         } else {
-            let attributeds: [NSAttributedString.Key : Any] = [
-                .font: valueLabel.font!,
-                .foregroundColor: valueLabel.textColor.cgColor
-            ]
-            let attributes = NSAttributedString(string: valueLabel.text ?? "", attributes: attributeds)
-            let size = attributes.size()
-            result = size
+            
+            let sizes = values.map({
+                let attributeds: [NSAttributedString.Key : Any] = [
+                    .font: $0.value.font,
+                    .foregroundColor: $0.value.color.cgColor
+                ]
+                let attributes = NSAttributedString(string: $0.value.text, attributes: attributeds)
+                return attributes.size()
+            })
+            
+            let maxWidth = sizes.max(by: { $0.width < $1.width }) ?? .zero
+            let maxHeight = sizes.max(by: { $0.height < $1.height }) ?? .zero
+            
+            if maxWidth.width < maxHeight.height {
+                result = maxHeight
+            } else {
+                result = maxWidth
+            }
         }
         return result
     }

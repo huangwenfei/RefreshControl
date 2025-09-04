@@ -146,9 +146,9 @@ open class RefreshHeader: Refresh, RefreshHeaderProtocol {
     
     open override func updateConstraints() {
         
-        let contentSize = isShowContent ? directionSize.content : 0
-        let stateSize = isShowState ? self.stateSize : .zero
-        let timeSize = isShowTime ? self.timeSize : .zero
+        let contentSize = directionSize.content
+        let stateSize = self.stateSize
+        let timeSize = self.timeSize
         
         switch direction {
             // MARK: Top
