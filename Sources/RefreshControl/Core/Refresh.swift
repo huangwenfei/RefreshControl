@@ -602,7 +602,7 @@ open class Refresh: UIView, RefreshStateProtocol, RefreshStateTimeAutoCalculate,
     open func resetRefreshing() {
         state = .idle
         self.progress = 0.0
-        UIView.animate(withDuration: animationConfiguration.duration) {
+        UIView.animate(withDuration: animationConfiguration.duration, delay: 0.1) {
             self.alpha = 0.0
         }
     }
